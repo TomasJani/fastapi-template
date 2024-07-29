@@ -5,9 +5,8 @@ from pathlib import Path
 from typing import Any
 
 import emails  # type: ignore
-import jwt
 from jinja2 import Template
-from jwt.exceptions import InvalidTokenError
+from jose import JWTError, jwt
 
 from app.core.config import settings
 
@@ -47,7 +46,7 @@ def send_email(
         smtp_options["user"] = settings.SMTP_USER
     if settings.SMTP_PASSWORD:
         smtp_options["password"] = settings.SMTP_PASSWORD
-    response = message.send(to=email_to, smtp=smtp_options)
+    response = message.send(to=email_to, smtp=smtp_options)  # type: ignore
     logging.info(f"send email result: {response}")
 
 
@@ -113,5 +112,5 @@ def verify_password_reset_token(token: str) -> str | None:
     try:
         decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         return str(decoded_token["sub"])
-    except InvalidTokenError:
+    except JWTError:
         return None
