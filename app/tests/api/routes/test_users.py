@@ -2,12 +2,14 @@ import uuid
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-from sqlmodel import Session, select
+from sqlalchemy.orm import Session
+from sqlmodel import select
 
 from app import crud
 from app.core.config import settings
 from app.core.security import verify_password
-from app.models import User, UserCreate
+from app.domain import model
+from app.models import UserCreate
 from app.tests.utils.utils import random_email, random_lower_string
 
 
@@ -184,8 +186,8 @@ def test_update_user_me(
     assert updated_user["email"] == email
     assert updated_user["full_name"] == full_name
 
-    user_query = select(User).where(User.email == email)
-    user_db = db.exec(user_query).first()
+    user_query = select(model.User).where(model.User.email == email)
+    user_db = db.execute(user_query).first()
     assert user_db
     assert user_db.email == email
     assert user_db.full_name == full_name
@@ -208,8 +210,8 @@ def test_update_password_me(
     updated_user = r.json()
     assert updated_user["message"] == "Password updated successfully"
 
-    user_query = select(User).where(User.email == settings.FIRST_SUPERUSER)
-    user_db = db.exec(user_query).first()
+    user_query = select(model.User).where(model.User.email == settings.FIRST_SUPERUSER)
+    user_db = db.execute(user_query).first()
     assert user_db
     assert user_db.email == settings.FIRST_SUPERUSER
     assert verify_password(new_password, user_db.hashed_password)
@@ -297,8 +299,8 @@ def test_register_user(client: TestClient, db: Session) -> None:
         assert created_user["email"] == username
         assert created_user["full_name"] == full_name
 
-        user_query = select(User).where(User.email == username)
-        user_db = db.exec(user_query).first()
+        user_query = select(model.User).where(model.User.email == username)
+        user_db = db.execute(user_query).first()
         assert user_db
         assert user_db.email == username
         assert user_db.full_name == full_name
@@ -360,8 +362,8 @@ def test_update_user(
 
     assert updated_user["full_name"] == "Updated_full_name"
 
-    user_query = select(User).where(User.email == username)
-    user_db = db.exec(user_query).first()
+    user_query = select(model.User).where(model.User.email == username)
+    user_db = db.execute(user_query).first()
     db.refresh(user_db)
     assert user_db
     assert user_db.full_name == "Updated_full_name"
@@ -426,11 +428,11 @@ def test_delete_user_me(client: TestClient, db: Session) -> None:
     assert r.status_code == 200
     deleted_user = r.json()
     assert deleted_user["message"] == "User deleted successfully"
-    result = db.exec(select(User).where(User.id == user_id)).first()
+    result = db.execute(select(model.User).where(model.User.id == user_id)).first()
     assert result is None
 
-    user_query = select(User).where(User.id == user_id)
-    user_db = db.exec(user_query).first()
+    user_query = select(model.User).where(model.User.id == user_id)
+    user_db = db.execute(user_query).first()
     assert user_db is None
 
 
@@ -461,7 +463,7 @@ def test_delete_user_super_user(
     assert r.status_code == 200
     deleted_user = r.json()
     assert deleted_user["message"] == "User deleted successfully"
-    result = db.exec(select(User).where(User.id == user_id)).first()
+    result = db.execute(select(model.User).where(model.User.id == user_id)).first()
     assert result is None
 
 

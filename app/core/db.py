@@ -1,8 +1,11 @@
-from sqlmodel import Session, create_engine, select
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from sqlmodel import select
 
 from app import crud
 from app.core.config import settings
-from app.models import User, UserCreate
+from app.domain import model
+from app.models import UserCreate
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
@@ -22,10 +25,10 @@ def init_db(session: Session) -> None:
     # This works because the models are already imported and registered from app.models
     # SQLModel.metadata.create_all(engine)
 
-    user = session.exec(
-        select(User).where(User.email == settings.FIRST_SUPERUSER)
-    ).first()
+    stmt = select(model.User).where(model.User.email == settings.FIRST_SUPERUSER)
+    user = session.scalar(stmt)
     if not user:
+        # Use raw ORM or raw SQL to create initial data
         user_in = UserCreate(
             email=settings.FIRST_SUPERUSER,
             password=settings.FIRST_SUPERUSER_PASSWORD,

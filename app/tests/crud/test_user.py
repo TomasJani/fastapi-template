@@ -1,9 +1,10 @@
 from fastapi.encoders import jsonable_encoder
-from sqlmodel import Session
+from sqlalchemy.orm import Session
 
 from app import crud
 from app.core.security import verify_password
-from app.models import User, UserCreate, UserUpdate
+from app.domain import model
+from app.models import UserCreate, UserUpdate
 from app.tests.utils.utils import random_email, random_lower_string
 
 
@@ -74,7 +75,7 @@ def test_get_user(db: Session) -> None:
     username = random_email()
     user_in = UserCreate(email=username, password=password, is_superuser=True)
     user = crud.create_user(session=db, user_create=user_in)
-    user_2 = db.get(User, user.id)
+    user_2 = db.get(model.User, user.id)
     assert user_2
     assert user.email == user_2.email
     assert jsonable_encoder(user) == jsonable_encoder(user_2)
@@ -89,7 +90,7 @@ def test_update_user(db: Session) -> None:
     user_in_update = UserUpdate(password=new_password, is_superuser=True)
     if user.id is not None:  # type: ignore
         crud.update_user(session=db, db_user=user, user_in=user_in_update)
-    user_2 = db.get(User, user.id)
+    user_2 = db.get(model.User, user.id)
     assert user_2
     assert user.email == user_2.email
     assert verify_password(new_password, user_2.hashed_password)

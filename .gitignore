@@ -6,3 +6,5 @@ app.egg-info
 htmlcov
 .cache
 .venv
+.pytest_cache
+.ruff_cache

@@ -1,4 +1,4 @@
-# FastAPI Project - Backend
+# FastAPI Backend Project
 
 ## Requirements
 

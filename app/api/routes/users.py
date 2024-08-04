@@ -1,10 +1,13 @@
 import uuid
 from typing import Any
 
+import svcs
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+from sqlmodel import func, select
+from starlette import status
 
-from app import crud
+from app import crud, errors
+from app.api import deps
 from app.api.deps import (
     CurrentUser,
     SessionDep,
@@ -12,11 +15,10 @@ from app.api.deps import (
 )
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
+from app.domain import commands, model
 from app.models import (
-    Item,
     Message,
     UpdatePassword,
-    User,
     UserCreate,
     UserPublic,
     UserRegister,
@@ -24,9 +26,11 @@ from app.models import (
     UserUpdate,
     UserUpdateMe,
 )
-from app.utils import generate_new_account_email, send_email
 
 router = APIRouter()
+
+
+# TODO: Move most of this logic to commands
 
 
 @router.get(
@@ -39,40 +43,31 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     Retrieve users.
     """
 
-    count_statement = select(func.count()).select_from(User)
-    count = session.exec(count_statement).one()
+    count_statement = select(func.count()).select_from(model.User)
+    count = session.scalar(count_statement)
 
-    statement = select(User).offset(skip).limit(limit)
-    users = session.exec(statement).all()
+    statement = select(model.User).offset(skip).limit(limit)
+    users = session.scalars(statement).all()
 
     return UsersPublic(data=users, count=count)  # type: ignore
 
 
-@router.post(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
-)
-def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
-    """
-    Create new user.
-    """
-    user = crud.get_user_by_email(session=session, email=user_in.email)
-    if user:
+@router.post("/")
+def create_user(
+    *,
+    services: svcs.fastapi.DepContainer,
+    # super_user: deps.CurrentSuperUser,
+    create_user: commands.CreateUser,
+) -> Any:
+    bus = services.get(deps.MessageBusDep)
+    try:
+        bus.handle(create_user)
+    except errors.AlreadyExists:
         raise HTTPException(
-            status_code=400,
-            detail="The user with this email already exists in the system.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User with email {create_user.email} already exists.",
         )
-
-    user = crud.create_user(session=session, user_create=user_in)
-    if settings.emails_enabled and user_in.email:
-        email_data = generate_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
-        )
-        send_email(
-            email_to=user_in.email,
-            subject=email_data.subject,
-            html_content=email_data.html_content,
-        )
-    return user
+    return None
 
 
 @router.patch("/me", response_model=UserPublic)
@@ -134,8 +129,6 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == current_user.id)
-    session.exec(statement)  # type: ignore
     session.delete(current_user)
     session.commit()
     return Message(message="User deleted successfully")
@@ -169,7 +162,7 @@ def read_user_by_id(
     """
     Get a specific user by id.
     """
-    user = session.get(User, user_id)
+    user = session.get(model.User, user_id)
     if user == current_user:
         return user
     if not current_user.is_superuser:
@@ -195,7 +188,7 @@ def update_user(
     Update a user.
     """
 
-    db_user = session.get(User, user_id)
+    db_user = session.get(model.User, user_id)
     if not db_user:
         raise HTTPException(
             status_code=404,
@@ -219,15 +212,13 @@ def delete_user(
     """
     Delete a user.
     """
-    user = session.get(User, user_id)
+    user = session.get(model.User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if user == current_user:
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == user_id)
-    session.exec(statement)  # type: ignore
     session.delete(user)
     session.commit()
     return Message(message="User deleted successfully")

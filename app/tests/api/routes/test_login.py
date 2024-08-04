@@ -1,11 +1,12 @@
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
-from sqlmodel import Session, select
+from sqlalchemy.orm import Session
+from sqlmodel import select
 
 from app.core.config import settings
 from app.core.security import verify_password
-from app.models import User
+from app.domain import model
 from app.utils import generate_password_reset_token
 
 
@@ -82,8 +83,8 @@ def test_reset_password(
     assert r.status_code == 200
     assert r.json() == {"message": "Password updated successfully"}
 
-    user_query = select(User).where(User.email == settings.FIRST_SUPERUSER)
-    user = db.exec(user_query).first()
+    user_query = select(model.User).where(model.User.email == settings.FIRST_SUPERUSER)
+    user = db.execute(user_query).first()
     assert user
     assert verify_password(data["new_password"], user.hashed_password)
 

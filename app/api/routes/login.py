@@ -20,6 +20,8 @@ from app.utils import (
 
 router = APIRouter()
 
+# TODO: Move most of this logic to commands
+
 
 @router.post("/login/access-token")
 def login_access_token(

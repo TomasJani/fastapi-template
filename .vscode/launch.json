@@ -29,5 +29,23 @@
             "jinja": true,
             "envFile": "${workspaceFolder}/.env",
         },
+        {
+            "name": "Test Pre-Start",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/app/scripts/tests_pre_start.py",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}",
+        },
+        {
+            "name": "Test Backend Pre-Start",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/app/scripts/backend_pre_start.py",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}",
+        },
     ]
 }

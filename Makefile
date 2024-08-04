@@ -1,7 +1,13 @@
-.PHONY: make-migrations migrate prestart start-worker
+.PHONY: make-migrations migrate format lint
 
 make-migrations:
-	alembic revision --autogenerate
+	alembic revision --autogenerate -m $(m)
 
 migrate:
 	alembic upgrade head
+
+format:
+	ruff format
+
+lint: 
+	ruff check --fix

@@ -18,9 +18,9 @@ fileConfig(config.config_file_name) # type: ignore
 # target_metadata = mymodel.Base.metadata
 # target_metadata = None
 
-from app.models import SQLModel  # noqa
+from app.adapters.orm import metadata  # noqa
 
-target_metadata = SQLModel.metadata
+target_metadata = metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
