@@ -3,11 +3,13 @@
         "editor.defaultFormatter": "charliermarsh.ruff"
     },
     "python.analysis.diagnosticMode": "workspace",
-    "python.analysis.typeCheckingMode": "strict",
     "python.testing.pytestArgs": [
         "app"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.envFile": "${workspaceFolder}/.env"
+    "python.envFile": "${workspaceFolder}/.env",
+    "editor.tokenColorCustomizations": {
+        "comments": "#8CBA6E"
+    },
 }
