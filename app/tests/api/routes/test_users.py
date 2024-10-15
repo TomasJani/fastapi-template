@@ -12,6 +12,8 @@ from app.domain import model
 from app.models import UserCreate
 from app.tests.utils.utils import random_email, random_lower_string
 
+# TODO: Rewrite this tests using Fake Repository, ...!
+
 
 def test_get_users_superuser_me(
     client: TestClient, superuser_token_headers: dict[str, str]

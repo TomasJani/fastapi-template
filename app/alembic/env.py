@@ -10,7 +10,7 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name) # type: ignore
+fileConfig(config.config_file_name)  # type: ignore
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -65,7 +65,7 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    configuration: dict[str, str] = config.get_section(config.config_ini_section) # type: ignore
+    configuration: dict[str, str] = config.get_section(config.config_ini_section)  # type: ignore
     configuration["sqlalchemy.url"] = get_url()
     connectable = engine_from_config(
         configuration,

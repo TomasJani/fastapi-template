@@ -7,6 +7,9 @@ from app.domain import model
 from app.models import UserCreate, UserUpdate
 from app.tests.utils.utils import random_email, random_lower_string
 
+# TODO: Does this utils even make sense if we want to decouple our test from as
+# TODO: much unnecessary logic as possible?
+
 
 def user_authentication_headers(
     *, client: TestClient, email: str, password: str

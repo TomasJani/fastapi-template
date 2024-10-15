@@ -9,6 +9,8 @@ from app.core.security import verify_password
 from app.domain import model
 from app.utils import generate_password_reset_token
 
+# TODO: Rewrite this tests using Fake Repository, ...!
+
 
 def test_get_access_token(client: TestClient) -> None:
     login_data = {

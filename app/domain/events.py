@@ -9,8 +9,7 @@ class Event(BaseModel):
 
 
 class EventHandler(typing.Protocol):
-    def __call__(self, event: typing.Any, services: svcs.Container) -> None:
-        ...
+    def __call__(self, event: typing.Any, services: svcs.Container) -> None: ...
 
 
 EventHandlersConfig = dict[type[Event], typing.Sequence[EventHandler]]

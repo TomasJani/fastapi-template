@@ -4,6 +4,8 @@ from sqlmodel import select
 
 from app.scripts.tests_pre_start import init, logger
 
+# TODO: Rewrite this tests using Fake Repository, ...!
+
 
 def test_init_successful_connection() -> None:
     engine_mock = MagicMock()

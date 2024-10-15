@@ -9,8 +9,7 @@ class Command(BaseModel):
 
 
 class CommandHandler(typing.Protocol):
-    def __call__(self, cmd: typing.Any, services: svcs.Container) -> None:
-        ...
+    def __call__(self, cmd: typing.Any, services: svcs.Container) -> None: ...
 
 
 CommandHandlerConfig = dict[type[Command], CommandHandler]

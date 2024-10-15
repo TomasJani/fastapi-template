@@ -7,6 +7,8 @@ from app.domain import model
 from app.models import UserCreate, UserUpdate
 from app.tests.utils.utils import random_email, random_lower_string
 
+# TODO: Rewrite this tests using Fake Repository, ...!
+
 
 def test_create_user(db: Session) -> None:
     email = random_email()
