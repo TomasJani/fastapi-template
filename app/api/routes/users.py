@@ -62,11 +62,11 @@ def create_user(
     bus = services.get(deps.MessageBusDep)
     try:
         bus.handle(create_user)
-    except errors.AlreadyExists:
+    except errors.AlreadyExists as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"User with email {create_user.email} already exists.",
-        )
+        ) from error
     return None
 
 
